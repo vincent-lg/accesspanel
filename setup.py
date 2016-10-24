@@ -5,10 +5,6 @@ AccessPanel is a module to enhance accessibility though a set of
 classes derived from wx.
 """.strip()
 
-packages = find_packages()
-print packages
-c=raw_input()
-
 setup(
     name = "accesspanel",
     version = "0.1",

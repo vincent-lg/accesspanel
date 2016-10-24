@@ -121,10 +121,8 @@ class AccessPanel(wx.Panel):
         message = e.GetValue()
 
         # Normalize new lines
-        message = message.replace("\r", "\n")
-        message = message.replace("\n\n", "\n")
-        message = message.replace("\n", "\r\n")
-        if not message.endswith("\n"):
+        message = "\r\n".join(message.splitlines())
+        if not message.endswith("\r\n"):
             message += "\r\n"
 
         pos = self.output.GetInsertionPoint()
