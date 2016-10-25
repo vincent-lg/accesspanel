@@ -101,6 +101,12 @@ class AccessPanel(wx.Panel):
 
         return pos < self.editing_pos
 
+    def ClearInput(self):
+        """Clear the input text."""
+        self.output.Remove(
+                self.editing_pos, self.output.GetLastPosition())
+        self.editing_pos = self.output.GetLastPosition()
+
     def OnInput(self, message):
         """A message has been sent by pressing RETURN.
 
@@ -134,6 +140,7 @@ class AccessPanel(wx.Panel):
         # Clears the output field and pastes the text back in
         self.output.SetValue(output)
         self.output.AppendText(message)
+
         # If the cursor is beyond the editing position
         if pos >= self.editing_pos:
             pos += len(message)
@@ -161,9 +168,7 @@ class AccessPanel(wx.Panel):
 
         # If the user has pressed RETURN
         if key == wx.WXK_RETURN and modifiers == 0:
-            self.output.Remove(
-                    self.editing_pos, self.output.GetLastPosition())
-            self.editing_pos = self.output.GetLastPosition()
+            self.ClearInput()
             self.OnInput(input)
             skip = False
 
