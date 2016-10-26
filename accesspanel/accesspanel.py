@@ -46,7 +46,11 @@ Additional features:
 
 """
 
+from collections import OrderedDict
+
 import wx
+
+import extensions
 
 # Event definition
 myEVT_MESSAGE = wx.NewEventType()
@@ -104,9 +108,15 @@ class AccessPanel(wx.Panel):
 
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, history=False):
         super(AccessPanel, self).__init__(parent)
         self.editing_pos = 0
+        self.extensions = OrderedDict()
+
+        # Build the extensions
+        if history:
+            extension = extensions.CommandHistory(self)
+            self.extensions["history"] = extension
 
         # Window design
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -123,8 +133,7 @@ class AccessPanel(wx.Panel):
         self.Bind(EVT_MESSAGE, self.OnMessage)
         output.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
-    @property
-    def input(self):
+    def _get_input(self):
         """Return the text being edited.
 
         This text should be between the editing position (editing_pos)
@@ -133,6 +142,13 @@ class AccessPanel(wx.Panel):
         """
         return self.output.GetRange(
                 self.editing_pos, self.output.GetLastPosition())
+
+    def _set_input(self, text):
+        """Set the text in the input field."""
+        self.ClearInput()
+        self.output.AppendText(text)
+        self.output.SetInsertionPoint(self.output.GetInsertionPoint())
+    input = property(_get_input, _set_input)
 
     def IsEditing(self, beyond_one=False):
         """Return True if editing, False otherwise.
@@ -174,6 +190,12 @@ class AccessPanel(wx.Panel):
 
         """
         message = e.GetValue()
+
+        # Modify the text based on extensions
+        for extension in self.extensions.values():
+            message = extension.OnMessage(message)
+            if not message:
+                return
 
         # Normalize new lines
         message = "\r\n".join(message.splitlines())
@@ -218,6 +240,13 @@ class AccessPanel(wx.Panel):
         # If the user has pressed RETURN
         if key == wx.WXK_RETURN and modifiers == 0:
             self.ClearInput()
+
+            # Call the extensions' 'OnInput'
+            for extension in self.extensions.values():
+                input = extension.OnInput(input)
+                if not input:
+                    return
+
             self.OnInput(input)
             skip = False
 
@@ -230,6 +259,13 @@ class AccessPanel(wx.Panel):
         # If we press backspace out of the input area
         if key == wx.WXK_BACK and modifiers == 0 and self.IsEditing(True):
             skip = False
+
+        # Call the extensions' 'OnKeyDown' method
+        if skip:
+            for extension in self.extensions.values():
+                skip = extension.OnKeyDown(modifiers, key)
+                if not skip:
+                    return
 
         if skip:
             e.Skip()
