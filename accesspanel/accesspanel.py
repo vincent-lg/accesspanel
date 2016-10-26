@@ -1,4 +1,4 @@
-﻿# Copyright (c) 2015, LE GOFF Vincent
+﻿# Copyright (c) 2016, LE GOFF Vincent
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,19 @@
 
 The AccessPanel is a child of wx.Panel.  It behaves like an ordinary
 panel with a multi-line text field taking all available room.  This
-output field can serve as input, as well.
+output field can serve as input:
+
+If the user types in the output field, the cursor is moved to the
+bottom of the text field where he/she can type.  The AccessPanel is
+like a big read-only text area, except for the last line(s).
+
+Additional features:
+1.  Command history
+    The AccessPanel supports a command history, meaning it will
+    remember what command has been entered and will allow to navigate
+    through the command history using CTRL + arrow keys.
+    You can activate it by setting the 'history' argument to True
+    when creating an AccessPanel.
 
 """
 
@@ -54,6 +66,43 @@ class MessageEvent(wx.PyCommandEvent):
 
 
 class AccessPanel(wx.Panel):
+
+    """Access panel with a text field (TextCtrl) in it.
+
+    Constructor:
+        parent: the parent window where the panel is defined.
+        history (default False): activate command history.
+
+    Example:
+    >>> import wx
+    >>> from accesspanel import AccessPanel
+    >>> class MyAccessPanel(AccessPanel):
+    ...     def __init__(self, parent):
+    ...         AccessPanel.__init__(self, parent, history=True)
+    ...
+    ...     def OnInput(self, text):
+    ...         print "I received", input
+    >>>
+    >>> class MainWindow(wx.Frame):
+    ...     def __init__(self):
+    ...         wx.Frame.__init__(self, None)
+    ...         self.panel = MyAccessPanel(self)
+    ...         # Write something in the text field
+    ...         self.panel.send("This is a text\nThat you shouldn't edit.")
+    ...         self.Maximize()
+    ...         self.show()
+
+    Attributes and properties:
+        output: The output text field (the TextCtrl)
+        input: the text contained in the lines allowed for editing
+
+    Methods:
+        IsEditing: is the cursor in the editing section?
+        OnInput: text is sent by the user pressing RETURN.
+        ClearInput: the input text is cleared.
+        Send: send text to the output field (it will added in the output).
+
+    """
 
     def __init__(self, parent):
         super(AccessPanel, self).__init__(parent)
@@ -85,8 +134,8 @@ class AccessPanel(wx.Panel):
         return self.output.GetRange(
                 self.editing_pos, self.output.GetLastPosition())
 
-    def is_editing(self, beyond_one=False):
-        """Return True if editing, False sinon.
+    def IsEditing(self, beyond_one=False):
+        """Return True if editing, False otherwise.
 
         We consider the user is editing if the cursor is in the input area.
 
@@ -151,7 +200,7 @@ class AccessPanel(wx.Panel):
         self.output.AppendText(input)
         self.output.SetInsertionPoint(pos)
 
-    def send(self, message):
+    def Send(self, message):
         """Create an event to send the message to the window."""
         evt = MessageEvent(myEVT_MESSAGE, -1, message)
         wx.PostEvent(self, evt)
@@ -179,7 +228,7 @@ class AccessPanel(wx.Panel):
                 pos = self.output.GetInsertionPoint()
 
         # If we press backspace out of the input area
-        if key == wx.WXK_BACK and modifiers == 0 and self.is_editing(True):
+        if key == wx.WXK_BACK and modifiers == 0 and self.IsEditing(True):
             skip = False
 
         if skip:
