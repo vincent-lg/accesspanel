@@ -32,12 +32,49 @@ from accesspanel.extensions.base import BaseExtension
 
 class CommandHistory(BaseExtension):
 
-    """Implement a command history."""
+    """Implement a command history.
+
+    Features of command history can be set using attributes.  Here is the list of attributes, see below for an example:
+        lock: what key to press to enter/leave lock mode (tuple)
+        up: what key to press to go up in the history (tuple)
+        down: what key to press to go down in the history (tuple)
+
+    The attributes needing a key must be described as a tuple
+    (modifiers, key) where both modifiers and keys are wxPython's key
+    codes.  For instance:
+
+    >>> import wx
+    >>> from accesspanel import AccessPanel
+    >>> class MyAccessPanel(AccessPanel):
+    ...     def __init__(self, parent):
+    ...         AccessPanel.__init__(self, parent, history=True)
+    ...         # Configure the history
+    ...         history = self.extensions["history"]
+    ...         history.lock = (wx.MOD_NONE, wx.WXK_ESCAPE)
+    ...         history.up = (wx.MOD_CONTROL, wx.WXK_UP)
+    ...         history.down = (wx.MOD_CONTROL, wx.WXK_DOWN)
+
+    Default values:
+        lock: escape
+        up: Ctrl + Up arrow
+        down: Ctrl + Down arrow
+
+    If you with to modify these default values, see the example above.
+    If you wish to remove the features (for instance, the lock), set
+    it to None.
+
+    """
 
     def __init__(self, panel):
         BaseExtension.__init__(self, panel)
         self.commands = []
         self.position = -1
+        self.locking = False
+
+        # Features that can be set in the AccessPanel
+        self.lock = (wx.MOD_NONE, wx.WXK_ESCAPE)
+        self.up = (wx.MOD_CONTROL, wx.WXK_UP)
+        self.down = (wx.MOD_CONTROL, wx.WXK_DOWN)
 
     def OnInput(self, text):
         """A command is sent, add it into the history."""
@@ -50,15 +87,25 @@ class CommandHistory(BaseExtension):
 
     def OnKeyDown(self, modifiers, key):
         """Add the keyboard shortcuts for the history navigation."""
-        if modifiers == wx.MOD_CONTROL:
-            if key == wx.WXK_UP:
-                self.GoUp()
-                return False
-            elif key == wx.WXK_DOWN:
-                self.GoDown()
-                return False
+        skip = False
+        shortcut = (modifiers, key)
+        lock_up = (wx.MOD_NONE, wx.WXK_UP)
+        lock_down = (wx.MOD_NONE, wx.WXK_DOWN)
 
-        return True
+        if shortcut == self.lock:
+            self.locking = not self.locking
+        elif self.locking and shortcut == lock_up:
+            self.GoUp()
+        elif self.locking and shortcut == lock_down:
+            self.GoDown()
+        elif shortcut == self.up:
+            self.GoUp()
+        elif shortcut == self.down:
+            self.GoDown()
+        else:
+            skip = True
+
+        return skip
 
     def GoUp(self):
         """Go up in the history."""
