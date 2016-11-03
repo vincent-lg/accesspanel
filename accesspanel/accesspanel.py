@@ -43,6 +43,9 @@ Additional features:
     through the command history using CTRL + arrow keys.
     You can activate it by setting the 'history' argument to True
     when creating an AccessPanel.
+2. Lock input
+    The AccessPanel can lock the user in the input, meaning the user
+    cannot leave the input field using tab or shift-tab.
 
 """
 
@@ -76,6 +79,7 @@ class AccessPanel(wx.Panel):
     Constructor:
         parent: the parent window where the panel is defined.
         history (default False): activate command history.
+        lock_input (default False): activate the lock in input.
 
     Example:
     >>> import wx
@@ -108,7 +112,7 @@ class AccessPanel(wx.Panel):
 
     """
 
-    def __init__(self, parent, history=False):
+    def __init__(self, parent, history=False, lock_input=False):
         super(AccessPanel, self).__init__(parent)
         self.editing_pos = 0
         self.extensions = OrderedDict()
@@ -117,6 +121,9 @@ class AccessPanel(wx.Panel):
         if history:
             extension = extensions.CommandHistory(self)
             self.extensions["history"] = extension
+        if lock_input:
+            extension = extensions.LockInput(self)
+            self.extensions["lock_input"] = extension
 
         # Window design
         sizer = wx.BoxSizer(wx.VERTICAL)
