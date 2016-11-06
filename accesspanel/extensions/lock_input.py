@@ -70,10 +70,8 @@ class LockInput(BaseExtension):
         skip = True
         if modifiers in (wx.MOD_NONE, wx.MOD_SHIFT) and key == wx.WXK_TAB:
             if not self.empty:
-                print "blocking"
                 skip = False
             elif self.panel.input:
-                print "blocking"
                 skip = False
 
         return skip

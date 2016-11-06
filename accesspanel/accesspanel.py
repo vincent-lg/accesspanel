@@ -55,6 +55,19 @@ import wx
 
 import extensions
 
+## Constants
+# Navigation keys (arrows, home/end, pageUp/pageDown...)
+NAV_KEYS = set()
+NAV_KEYS.add(wx.WXK_UP)
+NAV_KEYS.add(wx.WXK_DOWN)
+NAV_KEYS.add(wx.WXK_LEFT)
+NAV_KEYS.add(wx.WXK_RIGHT)
+NAV_KEYS.add(wx.WXK_HOME)
+NAV_KEYS.add(wx.WXK_END)
+NAV_KEYS.add(wx.WXK_PAGEUP)
+NAV_KEYS.add(wx.WXK_PAGEDOWN)
+NAV_KEYS.add(wx.WXK_NUMLOCK)
+
 # Event definition
 myEVT_MESSAGE = wx.NewEventType()
 EVT_MESSAGE = wx.PyEventBinder(myEVT_MESSAGE, 1)
@@ -72,6 +85,7 @@ class MessageEvent(wx.PyCommandEvent):
         return self._value
 
 
+## AccessPanel class
 class AccessPanel(wx.Panel):
 
     """Access panel with a text field (TextCtrl) in it.
@@ -258,8 +272,8 @@ class AccessPanel(wx.Panel):
             skip = False
 
         # If we press a letter before the input area, move it back there
-        if pos < self.editing_pos and modifiers == 0:
-            if 0 < key < 256:
+        if pos < self.editing_pos and modifiers in (wx.MOD_NONE, wx.MOD_SHIFT):
+            if key not in NAV_KEYS:
                 self.output.SetInsertionPoint(self.output.GetLastPosition())
                 pos = self.output.GetInsertionPoint()
 
