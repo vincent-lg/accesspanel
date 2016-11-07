@@ -273,7 +273,7 @@ class AccessPanel(wx.Panel):
             for extension in self.extensions.values():
                 input = extension.OnInput(input)
                 if not input:
-                    return
+                    break
 
             self.OnInput(input)
             skip = False
