@@ -80,8 +80,10 @@ class CommandHistory(BaseExtension):
         """A command is sent, add it into the history."""
         self.position = -1
         for command in text.splitlines():
-            if command not in self.commands:
-                self.commands.append(command)
+            if self.commands and command == self.commands[-1]:
+                continue
+
+            self.commands.append(command)
 
         return text
 

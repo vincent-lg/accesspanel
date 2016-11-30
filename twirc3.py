@@ -174,7 +174,7 @@ class ConversationsPanel(AccessPanel):
     """The access panel."""
 
     def __init__(self, window, connection):
-        AccessPanel.__init__(self, window, lock_input=True)
+        AccessPanel.__init__(self, window, history=True, lock_input=True)
         self.extensions["lock_input"].empty = True
         self.window = window
         self.connection = connection
@@ -192,10 +192,12 @@ class ConversationsWindow(wx.Frame):
     def __init__(self):
         super(ConversationsWindow, self).__init__(None)
         self.connection = Connection(self)
-        self.connection.start()
 
         # Window design
         self.panel = ConversationsPanel(self, self.connection)
+
+        # Connection
+        self.connection.start()
 
         # Event handler
         self.Bind(wx.EVT_CLOSE, self.OnClose)
