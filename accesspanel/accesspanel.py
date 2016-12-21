@@ -46,6 +46,7 @@ Additional features:
 2. Lock input
     The AccessPanel can lock the user in the input, meaning the user
     cannot leave the input field using tab or shift-tab.
+3. ANSI
 
 """
 
@@ -133,7 +134,8 @@ class AccessPanel(wx.Panel):
 
     """
 
-    def __init__(self, parent, history=False, lock_input=False):
+    def __init__(self, parent, history=False, lock_input=False,
+            ansi=False):
         super(AccessPanel, self).__init__(parent)
         self.editing_pos = 0
         self.extensions = OrderedDict()
@@ -145,13 +147,17 @@ class AccessPanel(wx.Panel):
         if lock_input:
             extension = extensions.LockInput(self)
             self.extensions["lock_input"] = extension
+        if ansi:
+            extension = extensions.ANSI(self)
+            self.extensions["ANSI"] = extension
 
         # Window design
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(sizer)
 
         # Output field
-        output = wx.TextCtrl(self, size=(600, 400), style=wx.TE_MULTILINE)
+        output = wx.TextCtrl(self, size=(600, 400),
+                style=wx.TE_MULTILINE | wx.TE_RICH2)
         self.output = output
 
         # Add the output field in the sizer
@@ -219,14 +225,15 @@ class AccessPanel(wx.Panel):
         """
         message = e.GetValue()
 
+        # Normalize new lines
+        message = "\r\n".join(message.splitlines())
+
         # Modify the text based on extensions
         for extension in self.extensions.values():
             message = extension.OnMessage(message)
             if not message:
                 return
 
-        # Normalize new lines
-        message = "\r\n".join(message.splitlines())
         if not message.endswith("\r\n"):
             message += "\r\n"
 
@@ -249,6 +256,10 @@ class AccessPanel(wx.Panel):
         self.editing_pos = self.output.GetLastPosition()
         self.output.AppendText(input)
         self.output.SetInsertionPoint(pos)
+
+        # Call the extensions' PostMessage
+        for extension in self.extensions.values():
+            extension.PostMessage(message)
 
     def Send(self, message):
         """Create an event to send the message to the window."""

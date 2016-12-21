@@ -64,6 +64,10 @@ class BaseExtension:
         """
         return text
 
+    def PostMessage(self, message):
+        """The message has been updated successfully>"""
+        pass
+
     def OnKeyDown(self, modifiers, key):
         """Add keyboard handling for this extension.
 
