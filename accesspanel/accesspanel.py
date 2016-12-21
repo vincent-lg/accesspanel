@@ -43,10 +43,12 @@ Additional features:
     through the command history using CTRL + arrow keys.
     You can activate it by setting the 'history' argument to True
     when creating an AccessPanel.
-2. Lock input
+2.  Lock input
     The AccessPanel can lock the user in the input, meaning the user
     cannot leave the input field using tab or shift-tab.
-3. ANSI
+3.  ANSI support
+    ANSI codes are displayed in the AccessPanel.  See the 'ANSI'
+    extension for more details.
 
 """
 
@@ -102,6 +104,7 @@ class AccessPanel(wx.Panel):
         parent: the parent window where the panel is defined.
         history (default False): activate command history.
         lock_input (default False): activate the lock in input.
+        ansi (default False): activate the ANSI extension.
 
     Example:
     >>> import wx
