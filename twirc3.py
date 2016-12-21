@@ -62,7 +62,7 @@ class IRCBot(irc.IRCClient):
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         if self.window:
-            self.window.send("~~~ Connected to the server. ~~~")
+            self.window.send("~~~ \x1b[1;34;41mConnected to the \x1b[0;31mserver\x1b[0m. ~~~")
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
@@ -102,11 +102,12 @@ class IRCBot(irc.IRCClient):
         nick, _, host = user.partition('!')
         fullname = self.nicks.get(nick, nick)
         if self.window:
-            self.window.send("<{}> {}".format(fullname, msg))
+            self.window.send("<\x1b[1;34m{}\x1b[m> {}".format(fullname, msg))
 
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""
         nick, _, host = user.partition('!')
+        return
         if self.window:
             self.window.send("{} {}".format(nick, msg))
 
@@ -174,7 +175,8 @@ class ConversationsPanel(AccessPanel):
     """The access panel."""
 
     def __init__(self, window, connection):
-        AccessPanel.__init__(self, window, history=True, lock_input=True)
+        AccessPanel.__init__(self, window, history=True, lock_input=True,
+                ansi=True)
         self.extensions["lock_input"].empty = True
         self.window = window
         self.connection = connection
@@ -184,7 +186,7 @@ class ConversationsPanel(AccessPanel):
         """Send the text to the connection."""
         message = message.encode("utf-8", "replace")
         self.connection.send(message)
-        self.Send("<{}> {}".format(self.connection.nickname, message))
+        self.Send("<\x1b[1;34m{}\x1b[m> {}".format(self.connection.nickname, message))
 
 
 class ConversationsWindow(wx.Frame):

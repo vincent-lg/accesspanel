@@ -60,7 +60,7 @@ class ANSI(BaseExtension):
         The third number represents the background color and should be
         between 40 and 47 (the same list of color applies).
 
-    :List of colors:
+    List of colors:
         | Color      | Foreground | Background |
         | Black      | 30         | 40         |
         | Red        | 31         | 41         |
@@ -186,17 +186,26 @@ class ANSI(BaseExtension):
         for start, end, foreground, background in pos:
             message = message[:start] + message[end:]
 
+        begin_tag = True
         updated_pos = 0
         last_mod = None
         for start, end, foreground, background in reversed(pos):
-            if last_mod is None:
-                last_mod = (start - updated_pos, foreground, background)
+            if begin_tag:
+                begin_tag = False
             else:
-                real_start, foreground, background = last_mod
+                begin_tag = True
+                real_start, m_foreground, m_background = last_mod
                 real_start += point
                 real_end = start - updated_pos + point
-                self.modifiers.append((real_start, real_end, foreground, background))
-                last_mod = None
+                self.modifiers.append((real_start, real_end, m_foreground,
+                        m_background))
+
+                # If it's not the default color, mark an open tag
+                if foreground != self.default_foreground or \
+                        background != self.default_background:
+                    begin_tag = False
+
+            last_mod = (start - updated_pos, foreground, background)
             updated_pos += end - start
 
         return message
