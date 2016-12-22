@@ -227,6 +227,7 @@ class AccessPanel(wx.Panel):
         the input field.
 
         """
+        self.output.Freeze()
         message = e.GetValue()
 
         # Normalize new lines
@@ -249,7 +250,6 @@ class AccessPanel(wx.Panel):
 
         # Clears the output field and pastes the text back in
         self.output.ChangeValue(output + message)
-        #self.output.AppendText(message)
 
         # If the cursor is beyond the editing position
         if pos >= self.editing_pos:
@@ -264,6 +264,8 @@ class AccessPanel(wx.Panel):
         # Call the extensions' PostMessage
         for extension in self.extensions.values():
             extension.PostMessage(message)
+
+        self.output.Thaw()
 
     def Send(self, message):
         """Create an event to send the message to the window."""
