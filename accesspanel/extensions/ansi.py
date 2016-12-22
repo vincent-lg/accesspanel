@@ -35,8 +35,8 @@ from accesspanel.extensions.base import BaseExtension
 
 ## Constants
 # Regular expressions to capture ANSI codes
-RE_ANSI = re.compile(r'\x1b\[([^m]*)m')
-RE_CODE = re.compile(r"^(?:(\d+)(?:\;(\d+)(?:\;(\d+))?)?)?$")
+RE_ANSI = re.compile(r'\x1b\[([^m]*)m', re.UNICODE)
+RE_CODE = re.compile(r"^(?:(\d+)(?:\;(\d+)(?:\;(\d+))?)?)?$", re.UNICODE)
 
 # Brightness
 NORMAL = 1
@@ -183,9 +183,6 @@ class ANSI(BaseExtension):
                 end = match.end()
                 pos.append((start, end, foreground, background))
 
-        for start, end, foreground, background in pos:
-            message = message[:start] + message[end:]
-
         begin_tag = True
         updated_pos = 0
         last_mod = None
@@ -193,10 +190,13 @@ class ANSI(BaseExtension):
             if begin_tag:
                 begin_tag = False
             else:
+                eol = message.count("\r", 0, start - 1)
                 begin_tag = True
                 real_start, m_foreground, m_background = last_mod
                 real_start += point
+                real_start -= eol
                 real_end = start - updated_pos + point
+                real_end -= eol
                 self.modifiers.append((real_start, real_end, m_foreground,
                         m_background))
 
@@ -207,6 +207,10 @@ class ANSI(BaseExtension):
 
             last_mod = (start - updated_pos, foreground, background)
             updated_pos += end - start
+
+        # Remove the ANSI codes from the message
+        for start, end, foreground, background in pos:
+            message = message[:start] + message[end:]
 
         return message
 

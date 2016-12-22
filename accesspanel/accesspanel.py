@@ -140,6 +140,7 @@ class AccessPanel(wx.Panel):
     def __init__(self, parent, history=False, lock_input=False,
             ansi=False):
         super(AccessPanel, self).__init__(parent)
+        print "ap"
         self.editing_pos = 0
         self.extensions = OrderedDict()
 
@@ -247,8 +248,8 @@ class AccessPanel(wx.Panel):
         input = self.input
 
         # Clears the output field and pastes the text back in
-        self.output.SetValue(output)
-        self.output.AppendText(message)
+        self.output.ChangeValue(output + message)
+        #self.output.AppendText(message)
 
         # If the cursor is beyond the editing position
         if pos >= self.editing_pos:
