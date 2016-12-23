@@ -140,7 +140,6 @@ class AccessPanel(wx.Panel):
     def __init__(self, parent, history=False, lock_input=False,
             ansi=False):
         super(AccessPanel, self).__init__(parent)
-        print "ap"
         self.editing_pos = 0
         self.extensions = OrderedDict()
 
@@ -165,11 +164,14 @@ class AccessPanel(wx.Panel):
         self.output = output
 
         # Add the output field in the sizer
-        sizer.Add(output, proportion=8)
+        sizer.Add(output, 1, wx.EXPAND)
 
         # Event handler
         self.Bind(EVT_MESSAGE, self.OnMessage)
         output.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+
+        # Panel design
+        sizer.Fit(self)
 
     def _get_input(self):
         """Return the text being edited.
