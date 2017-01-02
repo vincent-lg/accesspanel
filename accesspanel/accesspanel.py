@@ -137,7 +137,7 @@ class AccessPanel(wx.Panel):
 
     """
 
-    def __init__(self, parent, history=False, lock_input=False,
+    def __init__(self, parent, rich=True, history=False, lock_input=False,
             ansi=False):
         super(AccessPanel, self).__init__(parent)
         self.editing_pos = 0
@@ -159,8 +159,12 @@ class AccessPanel(wx.Panel):
         self.SetSizer(sizer)
 
         # Output field
-        output = wx.TextCtrl(self, size=(600, 400),
-                style=wx.TE_MULTILINE | wx.TE_RICH2)
+        if rich:
+            style = wx.TE_MULTILINE | wx.TE_RICH
+        else:
+            style = wx.TE_MULTILINE
+
+        output = wx.TextCtrl(self, size=(600, 400), style=style)
         self.output = output
 
         # Add the output field in the sizer
