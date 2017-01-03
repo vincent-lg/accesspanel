@@ -7,7 +7,7 @@ classes derived from wx.
 
 setup(
     name = "accesspanel",
-    version = "0.12",
+    version = "0.13",
     packages = find_packages(),
     install_requires = [],
     description = DESCRIPTION,

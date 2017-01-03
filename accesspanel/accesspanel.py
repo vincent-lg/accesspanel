@@ -142,6 +142,7 @@ class AccessPanel(wx.Panel):
         super(AccessPanel, self).__init__(parent)
         self.editing_pos = 0
         self.extensions = OrderedDict()
+        self.rich = rich
 
         # Build the extensions
         if history:
@@ -233,6 +234,7 @@ class AccessPanel(wx.Panel):
         the input field.
 
         """
+        pos = self.output.GetInsertionPoint()
         self.output.Freeze()
         message = e.GetValue()
 
@@ -248,8 +250,6 @@ class AccessPanel(wx.Panel):
         if not message.endswith("\r\n"):
             message += "\r\n"
 
-        pos = self.output.GetInsertionPoint()
-
         # Get the text before the editing line
         output = self.output.GetRange(0, self.editing_pos)
         input = self.input
@@ -259,7 +259,10 @@ class AccessPanel(wx.Panel):
 
         # If the cursor is beyond the editing position
         if pos >= self.editing_pos:
-            pos += len(message)
+            if self.rich:
+                pos += len(message.replace("\r\n", "\n"))
+            else:
+                pos += len(message)
 
         # We have added some text, the editing position should be
         # at the end of the text
