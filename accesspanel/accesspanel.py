@@ -268,13 +268,13 @@ class AccessPanel(wx.Panel):
         # at the end of the text
         self.editing_pos = self.output.GetLastPosition()
         self.output.AppendText(input)
-        self.output.SetInsertionPoint(pos)
 
         # Call the extensions' PostMessage
         for extension in self.extensions.values():
             extension.PostMessage(message)
 
         self.output.Thaw()
+        self.output.SetInsertionPoint(pos)
 
     def Send(self, message):
         """Create an event to send the message to the window."""
