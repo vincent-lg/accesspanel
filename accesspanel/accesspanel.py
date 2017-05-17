@@ -143,6 +143,7 @@ class AccessPanel(wx.Panel):
         self.editing_pos = 0
         self.extensions = OrderedDict()
         self.rich = rich
+        self.screenreader_support = True
 
         # Build the extensions
         if history:
@@ -235,7 +236,9 @@ class AccessPanel(wx.Panel):
 
         """
         pos = self.output.GetInsertionPoint()
-        self.output.Freeze()
+        if not self.screenreader_support:
+            self.output.Freeze()
+
         message = e.GetValue()
 
         # Normalize new lines
@@ -273,7 +276,9 @@ class AccessPanel(wx.Panel):
         for extension in self.extensions.values():
             extension.PostMessage(message)
 
-        self.output.Thaw()
+        if not self.screenreader_support:
+            self.output.Thaw()
+
         self.output.SetInsertionPoint(pos)
 
     def Send(self, message):
