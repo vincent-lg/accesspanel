@@ -86,13 +86,18 @@ class MessageEvent(wx.PyCommandEvent):
 
     """Event when a message is received."""
 
-    def __init__(self, etype, eid, value=None):
+    def __init__(self, etype, eid, value=None, pos=None):
         wx.PyCommandEvent.__init__(self, etype, eid)
         self._value = value
+        self._pos = pos
 
     def GetValue(self):
         """Return the event's value."""
         return self._value
+
+    def GetPos(self):
+        """Return the event's value."""
+        return self._pos
 
 
 ## AccessPanel class
@@ -235,11 +240,12 @@ class AccessPanel(wx.Panel):
         the input field.
 
         """
-        pos = self.output.GetInsertionPoint()
+        origin = pos = self.output.GetInsertionPoint()
         if not self.screenreader_support:
             self.output.Freeze()
 
         message = e.GetValue()
+        mark = e.GetPos()
 
         # Normalize new lines
         message = "\r\n".join(message.splitlines())
@@ -279,11 +285,15 @@ class AccessPanel(wx.Panel):
         if not self.screenreader_support:
             self.output.Thaw()
 
-        self.output.SetInsertionPoint(pos)
+        # If there's a mark
+        if mark:
+            self.output.SetInsertionPoint(origin + mark)
+        else:
+            self.output.SetInsertionPoint(pos)
 
-    def Send(self, message):
+    def Send(self, message, pos=None):
         """Create an event to send the message to the window."""
-        evt = MessageEvent(myEVT_MESSAGE, -1, message)
+        evt = MessageEvent(myEVT_MESSAGE, -1, message, pos)
         wx.PostEvent(self, evt)
 
     def OnKeyDown(self, e):
